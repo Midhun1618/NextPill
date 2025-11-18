@@ -26,15 +26,11 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-
         addNewBtn = findViewById(R.id.addNew)
 
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.addnew_dialog)
         dialog.setCancelable(true)
-
-
-
 
         addNewBtn.setOnClickListener{
             dialog.show()
