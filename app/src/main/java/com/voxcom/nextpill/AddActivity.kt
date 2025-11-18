@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,9 +19,13 @@ class AddActivity : AppCompatActivity() {
 
     private lateinit var resultText: TextView
     lateinit var img : ImageButton
+    lateinit var thumb : ImageView
     val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            uri?.let { runTextRecognition(it) }
+
+            uri?.let {
+                thumb.setImageURI(it)
+                runTextRecognition(it) }
         }
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -43,6 +48,7 @@ class AddActivity : AppCompatActivity() {
 
         img = findViewById(R.id.btnImg)
         resultText = findViewById(R.id.result_text)
+        thumb = findViewById(R.id.thumbnail)
 
         img.setOnClickListener {
             requestPermissionLauncher.launch(android.Manifest.permission.READ_MEDIA_IMAGES)
