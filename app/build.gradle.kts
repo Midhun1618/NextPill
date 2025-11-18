@@ -38,6 +38,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.mlkit.text.recognition)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
