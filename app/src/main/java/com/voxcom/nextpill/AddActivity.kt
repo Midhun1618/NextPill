@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -20,6 +21,7 @@ class AddActivity : AppCompatActivity() {
     private lateinit var resultText: TextView
     lateinit var img : ImageButton
     lateinit var thumb : ImageView
+    lateinit var medList: MutableList<MedicineInfo>
     val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
 
@@ -62,10 +64,57 @@ class AddActivity : AppCompatActivity() {
             .addOnSuccessListener { visionText ->
                 resultText.text = visionText.text
                 Log.d("OCR", "Extracted: ${visionText.text}")
+                extractMedicineData(resultText.toString())
             }
             .addOnFailureListener { e ->
                 resultText.text = "Error: ${e.message}"
                 Log.e("OCR", "Error: ", e)
             }
     }
+    fun extractMedicineData(text: String): List<MedicineInfo> {
+        val medicines = mutableListOf<MedicineInfo>()
+
+        val chunks = text.split(Regex("""\n\s*\d+\)\s*"""))
+
+        for (chunk in chunks) {
+            if (chunk.length < 5) continue
+
+            var medName = ""
+            var dosage = ""
+            var frequency = ""
+
+            val medRegex = Regex("(?i)(tab|cap|inj|syrup|syp|gel|cream|drops)[^\n]+")
+            medRegex.find(chunk)?.let {
+                medName = it.value.trim()
+            }
+
+            if (medName.isEmpty()) {
+                val firstLine = chunk.lines().firstOrNull()?.trim() ?: ""
+                if (firstLine.matches(Regex("[A-Z .0-9/-]+"))) {
+                    medName = firstLine
+                }
+            }
+
+            val dosageRegex = Regex("(?i)(morning|night|noon|evening|after food|before food|\\d-\\d-\\d|\\b\\d dose\\b)[^\n]*")
+            dosageRegex.find(chunk)?.let {
+                dosage = it.value.trim()
+            }
+
+            val durationRegex = Regex("(?i)(\\d+\\s*days|\\d+\\s*day|\\d+\\s*weeks|for\\s*\\d+\\s*days)")
+            durationRegex.find(chunk)?.let {
+                frequency = it.value.trim()
+            }
+
+            medList.add(
+                MedicineInfo(
+                    name = medName,
+                    dosage = dosage,
+                    frequency = frequency
+                )
+            )
+        }
+
+        return medicines
+    }
+
 }
