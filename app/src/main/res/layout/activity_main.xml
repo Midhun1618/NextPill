@@ -15,8 +15,8 @@
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_margin="15dp"
             android:src="@drawable/icon"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -65,13 +65,27 @@
                 android:layout_height="wrap_content"
                 android:text="Today,"
                 android:textSize="18sp" />
-
-            <TextView
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="17 May"
-                android:textSize="25sp"
-                android:textStyle="bold" />
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/date_day"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="17"
+                    android:textSize="25sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/date_mon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="May"
+                    android:paddingLeft="5dp"
+                    android:textSize="25sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
         </LinearLayout>
 
         <Button
@@ -126,3 +140,9 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>
+    val formatter = DateTimeFormatter.ofPattern("dd MMM")
+    val today = LocalDate.now().format(formatter)
+    val hourFormat = DateTimeFormatter.ofPattern("hh")
+    val mFormat = DateTimeFormatter.ofPattern("a")
+    val timeH = LocalTime.now().format(hourFormat)
+    val timeM = LocalTime.now().format(mFormat)

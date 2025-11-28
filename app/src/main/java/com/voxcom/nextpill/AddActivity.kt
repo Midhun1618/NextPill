@@ -6,7 +6,6 @@ import android.util.Log
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -21,7 +20,7 @@ class AddActivity : AppCompatActivity() {
     private lateinit var resultText: TextView
     lateinit var img : ImageButton
     lateinit var thumb : ImageView
-    lateinit var medList: MutableList<MedicineInfo>
+    private lateinit var viewModel: MedicineViewModel
     val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
 
@@ -55,6 +54,7 @@ class AddActivity : AppCompatActivity() {
         img.setOnClickListener {
             requestPermissionLauncher.launch(android.Manifest.permission.READ_MEDIA_IMAGES)
         }
+        viewModel = MedicineViewModel(application)
     }
 
     private fun runTextRecognition(uri: Uri) {
@@ -62,10 +62,15 @@ class AddActivity : AppCompatActivity() {
         val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
         recognizer.process(image)
             .addOnSuccessListener { visionText ->
-                resultText.text = visionText.text
-                Log.d("OCR", "Extracted: ${visionText.text}")
-                extractMedicineData(resultText.toString())
+                val extractedList = extractMedicineData(visionText.text)
+
+                extractedList.forEach {
+                    viewModel.addMedicine(it)
+                }
+
+                resultText.text = "Saved ${extractedList.size} medicines 👍"
             }
+
             .addOnFailureListener { e ->
                 resultText.text = "Error: ${e.message}"
                 Log.e("OCR", "Error: ", e)
@@ -105,13 +110,8 @@ class AddActivity : AppCompatActivity() {
                 frequency = it.value.trim()
             }
 
-            medList.add(
-                MedicineInfo(
-                    name = medName,
-                    dosage = dosage,
-                    frequency = frequency
-                )
-            )
+            resultText.text = "${medName} ${dosage} ${frequency}"
+
         }
 
         return medicines
