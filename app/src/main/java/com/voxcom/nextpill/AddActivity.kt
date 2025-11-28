@@ -18,15 +18,16 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 class AddActivity : AppCompatActivity() {
 
     private lateinit var resultText: TextView
-    lateinit var img : ImageButton
-    lateinit var thumb : ImageView
+    lateinit var img: ImageButton
+    lateinit var thumb: ImageView
     private lateinit var viewModel: MedicineViewModel
     val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
 
             uri?.let {
                 thumb.setImageURI(it)
-                runTextRecognition(it) }
+                runTextRecognition(it)
+            }
         }
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -76,45 +77,42 @@ class AddActivity : AppCompatActivity() {
                 Log.e("OCR", "Error: ", e)
             }
     }
+
     fun extractMedicineData(text: String): List<MedicineInfo> {
         val medicines = mutableListOf<MedicineInfo>()
 
-        val chunks = text.split(Regex("""\n\s*\d+\)\s*"""))
+        // Regex pattern: Name + dosage
+        val regex = Regex("""([A-Za-z][A-Za-z ]+)\s*(\d+\s*(mg|ml|iu|IU|MG|ML))""")
 
-        for (chunk in chunks) {
-            if (chunk.length < 5) continue
+        val lines = text.lines()
 
-            var medName = ""
-            var dosage = ""
-            var frequency = ""
+        for (line in lines) {
+            val match = regex.find(line)
 
-            val medRegex = Regex("(?i)(tab|cap|inj|syrup|syp|gel|cream|drops)[^\n]+")
-            medRegex.find(chunk)?.let {
-                medName = it.value.trim()
-            }
+            if (match != null) {
+                val name = match.groupValues[1].trim()
+                val dose = match.groupValues[2].trim()
 
-            if (medName.isEmpty()) {
-                val firstLine = chunk.lines().firstOrNull()?.trim() ?: ""
-                if (firstLine.matches(Regex("[A-Z .0-9/-]+"))) {
-                    medName = firstLine
+                // detect schedule
+                val schedule = when {
+                    line.contains("morning", true) -> "Morning"
+                    line.contains("evening", true) -> "Evening"
+                    line.contains("night", true) -> "Night"
+                    line.contains("2 times", true) -> "Twice Daily"
+                    line.contains("3 times", true) -> "Thrice Daily"
+                    else -> "Unspecified"
                 }
+
+                medicines.add(
+                    MedicineInfo(
+                        name = name,
+                        dosage = dose,
+                        frequency = schedule
+                    )
+                )
             }
-
-            val dosageRegex = Regex("(?i)(morning|night|noon|evening|after food|before food|\\d-\\d-\\d|\\b\\d dose\\b)[^\n]*")
-            dosageRegex.find(chunk)?.let {
-                dosage = it.value.trim()
-            }
-
-            val durationRegex = Regex("(?i)(\\d+\\s*days|\\d+\\s*day|\\d+\\s*weeks|for\\s*\\d+\\s*days)")
-            durationRegex.find(chunk)?.let {
-                frequency = it.value.trim()
-            }
-
-            resultText.text = "${medName} ${dosage} ${frequency}"
-
         }
 
         return medicines
     }
-
 }
