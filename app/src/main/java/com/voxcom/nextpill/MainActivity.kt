@@ -39,7 +39,12 @@ class MainActivity : AppCompatActivity() {
         dateMon = findViewById(R.id.date_mon)
         val formatter = DateTimeFormatter.ofPattern("dd MMM")
         dateMon.text = LocalDate.now().format(formatter)
-
+//        val formatter = DateTimeFormatter.ofPattern("dd MMM")
+//        val today = LocalDate.now().format(formatter)
+//        val hourFormat = DateTimeFormatter.ofPattern("hh")
+//        val mFormat = DateTimeFormatter.ofPattern("a")
+//        val timeH = LocalTime.now().format(hourFormat)
+//        val timeM = LocalTime.now().format(mFormat)
         viewModel = MedicineViewModel(application)
 
         medList = mutableListOf()

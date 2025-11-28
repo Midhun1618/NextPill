@@ -140,9 +140,3 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>
-    val formatter = DateTimeFormatter.ofPattern("dd MMM")
-    val today = LocalDate.now().format(formatter)
-    val hourFormat = DateTimeFormatter.ofPattern("hh")
-    val mFormat = DateTimeFormatter.ofPattern("a")
-    val timeH = LocalTime.now().format(hourFormat)
-    val timeM = LocalTime.now().format(mFormat)
